@@ -1,2 +1,6 @@
 __pycache__
 CardDefs.xml
+*.pyc
+build
+dist
+fireplace.egg-info
