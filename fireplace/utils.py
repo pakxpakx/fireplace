@@ -233,3 +233,54 @@ def play_full_game() -> ".game.Game":
 		play_turn(game)
 
 	return game
+
+def deck_string_loader(__deck_string):
+	from hearthstone import deckstrings
+	import requests, json 
+	card_db = {}	
+	r = requests.get("https://api.hearthstonejson.com/v1/22611/enUS/cards.collectible.json")
+	json = r.json()
+	
+	for card in json:
+		card_db.update({card['dbfId']: card['id'] })
+
+	deck0 = deckstrings.Deck.from_deckstring(__deck_string)
+	cards = []
+	for card in deck0.cards:
+		if card[1] == 1:
+			cards.append(card_db[card[0]])
+		else:
+			cards.append(card_db[card[0]])
+			cards.append(card_db[card[0]])
+
+	return  cards
+
+def my_play_full_game() -> ".game.Game":
+	game = my_setup_game()
+
+	for player in game.players:
+		print("Can mulligan %r" % (player.choice.cards))
+		mull_count = random.randint(0, len(player.choice.cards))
+		cards_to_mulligan = random.sample(player.choice.cards, mull_count)
+		player.choice.choose(*cards_to_mulligan)
+
+	while True:
+		play_turn(game)
+
+	return game
+
+
+def my_setup_game() -> ".game.Game":
+	from .game import Game
+	from .player import Player
+	
+	deck1 = deck_string_loader('AAECAf0ECMABwwHtBZKsAoGyAuu6Atm7AsHBAgtxuwKVA6sElgXsBaO2Ate2Aoe9ApjEAo/TAgA=')
+	deck2 = random_draft(CardClass.WARRIOR)
+
+	player1 = Player("Player1", deck1, CardClass.MAGE.default_hero)
+	player2 = Player("Player2", deck2, CardClass.WARRIOR.default_hero)
+
+	game = Game(players=(player1, player2))
+	game.start()
+
+	return game
